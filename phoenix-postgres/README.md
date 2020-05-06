@@ -1,67 +1,83 @@
 ## Compose sample application
-### Elixir application with Phoenix framework and a Postgres database
+### Elixir application with Phoenix framework and  a Postgres database
 
 Project structure:
 ```
 .
 ├── app
-│   ├── Dockerfile
-│   ...
-├── docker-compose.yaml
-├── phoenix_output.png
+│   ├── phoenixapp
+│       ├───....
+├── db
+│   ├── db_env
+├── docker-compose.yml
 └── README.md
 ```
 
-[_docker-compose.yaml_](docker-compose.yaml)
+[docker-compose.yml](docker-compose.yml)
 ```
+version: "3"
 services:
-  app:
-    build: app
-    environment:
-      ...
   db:
-    image: postgres
-    ports: 
-      - "5432:5432" 
-    environment: 
-      ...
+    image: postgres:alpine
+    env_file: db/db_env
+    restart: always
+  backend:
+    build: app/
+    restart: always
+    command: mix phx.server
+    env_file: db/db_env
+    ports:
+      - 4000:4000
+    stdin_open: true
+    tty: true
+    depends_on:
+      - db
+    ...
 ```
-The compose file defines an application with three services `app` and `db`.
-When deploying the application, docker-compose maps the port 4000 of the app container to port 4000 of the host as specified in the file.
-Make sure port 4000 on the host is not already being in use.
+The compose file defines an application with two services  `db` and `backend`.
+
+running the dockerfile does some magic with docker :) and then creates a new phoenix app running at port 4000
 
 ## Deploy with docker-compose
 
 ```
 $ docker-compose up -d
-Creating network "phoenix-postgres_default" with the default driver
-Creating volume "phoenix-postgres_postgres" with default driver
+Building backend
+Step 1/8 : FROM elixir:latest
 ...
-Successfully built faa13730018d
-Successfully tagged phoenix-postgres_app:latest
-Image for service app was built because it did not already exist. To rebuild this image you must use `docker-compose build` or `docker-compose up --build`.
-Creating phoenix-postgres_db_1      ... done
-Creating phoenix-postgres_app_1     ... done
+Successfully built 016ca9fec348
+Successfully tagged phoenixpostgres_backend:latest
+Creating phoenixpostgres_db_1 ... 
+Creating phoenixpostgres_db_1 ... done
+Creating phoenixpostgres_backend_1 ... 
+Creating phoenixpostgres_backend_1 ... done
+
 ```
 
 ## Expected result
 
 Listing containers must show two containers running and the port mapping as below:
 ```
-$ docker ps
-CONTAINER ID        IMAGE                          COMMAND                  CREATED             STATUS              PORTS                           NAMES
-a12ab4dc42fb        phoenix-postgres_app           "sh entrypoint.sh"       22 seconds ago      Up 20 seconds       0.0.0.0:4000->4000/tcp          phoenix-postgres_app_1
-39c7a3212d51        postgres                       "docker-entrypoint.s…"   23 seconds ago      Up 21 seconds       5432/tcp                        phoenix-postgres_db_1
+$ docker-compose ps
+          Name                         Command              State           Ports          
+------------------------------------------------------------------------------------------
+phoenixpostgres_backend_1   mix phx.server                  Up      0.0.0.0:4000->4000/tcp 
+phoenixpostgres_db_1        docker-entrypoint.sh postgres   Up      5432/tcp 
 ```
 
 After the application starts, navigate to `http://localhost:4000` in your web browser:
 
 ![page](phoenix_output.png)
 
+
+
 Stop and remove the containers
 ```
-$ docker-compose down
-Stopping phoenix-postgres_app_1     ... done
-Stopping phoenix-postgres_db_1      ... done
-Removing network phoenix-postgres_default
+$ docker-compose down -v
+Stopping phoenixpostgres_backend_1 ... done
+Stopping phoenixpostgres_db_1      ... done
+Removing phoenixpostgres_backend_1 ... done
+Removing phoenixpostgres_db_1      ... done
+Removing network phoenixpostgres_default
+
 ```

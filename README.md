@@ -35,8 +35,13 @@ application with a Node.js backend and a MySQL database.
 application with a Rust backend and a Postgres database.
 - [`Spring / PostgreSQL`](https://github.com/docker/awesome-compose/tree/master/spring-postgres) - Sample Java application
 with Spring framework and a Postgres database.  
+<<<<<<< HEAD
 - [`Phoenix(Elixir) / PostgreSQL`](https://github.com/docker/awesome-compose/tree/master/phoenix-postgres) - Sample Elixir 
 application with Phoenix framework and a Postgres database
+=======
+- [`Phoenix(Elixir) / PostgreSQL / pgAdmin 4`](https://github.com/docker/awesome-compose/tree/master/phoenix-postgres-pgadmin) - Sample Elixir 
+application with Phoenix framework, a Postgres database and pgAdmin for DB management tool
+>>>>>>> Sample for  phoenix(elixir)-postgres-pgadmin
 
 ## Single service samples
 - [`Angular`](https://github.com/docker/awesome-compose/tree/master/angular)
